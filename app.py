@@ -84,4 +84,47 @@ if st.button("Predict", type="primary"):
         prediction = model.predict(input_data)
         st.success(f"Predicted Result: {prediction[0]}")
     except Exception as e:
-        st.error(f"Prediction nahi ho saki: {e}")
+        st.error(f"Prediction nahi ho saki: {e}")import streamlit as st
+import pandas as pd
+import numpy as np
+from sklearn.tree import DecisionTreeClassifier
+
+st.title("Starbucks Decision Tree Predictor")
+st.write("Yeh app dataset ko load karke on-the-fly model train karti hai aur prediction deti hai.")
+
+# Model ko cache kar lete hain taake bar bar train na ho
+@st.cache_resource
+def get_trained_model():
+    # GitHub repository mein starbucks.csv honi chahiye
+    df = pd.read_csv('starbucks.csv')
+    
+    target_column = 'Beverage_category' if 'Beverage_category' in df.columns else df.columns[0]
+    
+    # Columns auto-detect karna
+    cal_col = [c for c in df.columns if 'cal' in c.lower()][0]
+    prot_col = [c for c in df.columns if 'prot' in c.lower()][0]
+    
+    X = df[[cal_col, prot_col]].copy()
+    X.fillna(X.median(), inplace=True)
+    y = df[target_column]
+    
+    # Decision Tree Model Train karna
+    model = DecisionTreeClassifier(random_state=42, max_depth=5)
+    model.fit(X, y)
+    
+    return model, cal_col, prot_col
+
+try:
+    model, cal_col, prot_col = get_trained_model()
+
+    # User inputs
+    calories = st.number_input("Calories", min_value=0.0, max_value=500.0, value=200.0)
+    protein = st.number_input("Protein (g)", min_value=0.0, max_value=50.0, value=5.0)
+
+    if st.button("Predict"):
+        input_data = pd.DataFrame([[calories, protein]], columns=[cal_col, prot_col])
+        prediction = model.predict(input_data)
+        st.success(f"Predicted Result: {prediction[0]}")
+
+except Exception as e:
+    st.error(f"Error: {e}. Kindly ensure 'starbucks.csv' is uploaded in your GitHub repository.")
