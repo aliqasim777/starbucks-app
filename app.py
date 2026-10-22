@@ -17,17 +17,21 @@ def get_model():
     
     target_column = 'Beverage_category' if 'Beverage_category' in df.columns else df.columns[0]
     
-    X = df[['Calories', 'Protein (g)']].copy()
-    X['Calories'].fillna(X['Calories'].median(), inplace=True)
-    X['Protein (g)'].fillna(X['Protein (g)'].median(), inplace=True)
+    # Columns automatically dhoond lega taake koi index error na aaye
+    cal_col = [c for c in df.columns if 'cal' in c.lower()][0]
+    prot_col = [c for c in df.columns if 'prot' in c.lower()][0]
+    
+    X = df[[cal_col, prot_col]].copy()
+    X[cal_col].fillna(X[cal_col].median(), inplace=True)
+    X[prot_col].fillna(X[prot_col].median(), inplace=True)
     y = df[target_column]
     
     clf = DecisionTreeClassifier(random_state=42, max_depth=5)
     clf.fit(X, y)
-    return clf
+    return clf, cal_col, prot_col
 
 try:
-    model = get_model()
+    model, cal_col, prot_col = get_model()
 except Exception as e:
     st.error(f"Dataset error: {e}. Ensure 'starbucks.csv' is uploaded in GitHub.")
     st.stop()
@@ -38,9 +42,10 @@ protein = st.number_input("Protein (g)", min_value=0.0, max_value=100.0, value=5
 
 if st.button("Predict", type="primary"):
     try:
-        input_df = pd.DataFrame({"Calories": [calories], "Protein (g)": [protein]})
+        input_df = pd.DataFrame({cal_col: [calories], prot_col: [protein]})
         pred = model.predict(input_df)
         st.success(f"Predicted Result: {pred[0]}")
     except Exception as err:
         st.error(f"Prediction error: {err}")
+  
 
