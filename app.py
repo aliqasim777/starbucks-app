@@ -1,14 +1,5 @@
 import streamlit as st
 import pandas as pd
-import joblib
-
-# Saved model load karein
-model = joblib.load('starbucks_model.pkl')
-
-st.title("Starbucks Decision Tree Predictor")
-st.write("Yeh app Starbucks dataseimport streamlit as st
-import streamlit as st
-import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 
 st.set_page_config(
@@ -18,7 +9,7 @@ st.set_page_config(
 )
 
 st.title("☕ Starbucks Decision Tree Predictor")
-st.write("Decision Tree Machine Learning Model Prediction App")
+st.write("Yeh app Starbucks dataset par trained Decision Tree model ka use karti hai.")
 
 @st.cache_resource
 def get_model():
@@ -52,3 +43,4 @@ if st.button("Predict", type="primary"):
         st.success(f"Predicted Result: {pred[0]}")
     except Exception as err:
         st.error(f"Prediction error: {err}")
+
