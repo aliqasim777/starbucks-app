@@ -40,7 +40,8 @@ def load_and_train_model():
     target_column = 'Beverage_category' if 'Beverage_category' in df.columns else df.columns[0]
     
     X = df[['Calories', 'Protein (g)']].copy()
-    X.fillna(X.median(), inplace=True)
+    X['Calories'].fillna(X['Calories'].median(), inplace=True)
+    X['Protein (g)'].fillna(X['Protein (g)'].median(), inplace=True)
     y = df[target_column]
     
     model = DecisionTreeClassifier(random_state=42, max_depth=5)
