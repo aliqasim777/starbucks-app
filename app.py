@@ -21,7 +21,6 @@ if st.button("Predict"):
     st.success(f"Predicted Result: {prediction[0]}")
     import streamlit as st
 import pandas as pd
-import numpy as np
 from sklearn.tree import DecisionTreeClassifier
 
 st.set_page_config(
@@ -33,7 +32,7 @@ st.set_page_config(
 st.title("☕ Starbucks Decision Tree Predictor")
 st.write("Enter nutritional values to predict the Starbucks beverage category.")
 
-# App ke andar hi dataset load karke model train kar lenge (No version error!)
+# App ke andar hi dataset load karke model train hoga (No pkl file, No version error!)
 @st.cache_resource
 def load_and_train_model():
     df = pd.read_csv('starbucks.csv')
@@ -51,7 +50,7 @@ def load_and_train_model():
 try:
     model = load_and_train_model()
 except Exception as exc:
-    st.error(f"Dataset load ya model training mein masla hai: {exc}. Kindly check karein ke 'starbucks.csv' GitHub repository mein mojood hai.")
+    st.error(f"Error: {exc}. Kindly ensure 'starbucks.csv' is uploaded in your GitHub repository.")
     st.stop()
 
 st.subheader("Input Features")
