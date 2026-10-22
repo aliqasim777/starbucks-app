@@ -20,8 +20,9 @@ if st.button("Predict"):
     prediction = model.predict(input_data)
     st.success(f"Predicted Result: {prediction[0]}")
     import streamlit as st
-import joblib
-from pathlib import Path
+import pandas as pd
+import numpy as np
+from sklearn.tree import DecisionTreeClassifier
 
 st.set_page_config(
     page_title="Starbucks Decision Tree Predictor",
@@ -32,23 +33,25 @@ st.set_page_config(
 st.title("☕ Starbucks Decision Tree Predictor")
 st.write("Enter nutritional values to predict the Starbucks beverage category.")
 
-current_dir = Path(__file__).resolve().parent
-pkl_files = list(current_dir.glob("*.pkl"))
-
-if not pkl_files:
-    st.error("Model file (.pkl) nahi mili!")
-    st.stop()
-
-MODEL_PATH = pkl_files[0]
-
+# App ke andar hi dataset load karke model train kar lenge (No version error!)
 @st.cache_resource
-def load_model(path):
-    return joblib.load(path)
+def load_and_train_model():
+    df = pd.read_csv('starbucks.csv')
+    
+    target_column = 'Beverage_category' if 'Beverage_category' in df.columns else df.columns[0]
+    
+    X = df[['Calories', 'Protein (g)']].copy()
+    X.fillna(X.median(), inplace=True)
+    y = df[target_column]
+    
+    model = DecisionTreeClassifier(random_state=42, max_depth=5)
+    model.fit(X, y)
+    return model
 
 try:
-    model = load_model(MODEL_PATH)
+    model = load_and_train_model()
 except Exception as exc:
-    st.error(f"Model load nahi ho saka: {exc}")
+    st.error(f"Dataset load ya model training mein masla hai: {exc}. Kindly check karein ke 'starbucks.csv' GitHub repository mein mojood hai.")
     st.stop()
 
 st.subheader("Input Features")
@@ -61,8 +64,10 @@ protein = st.number_input(
 
 if st.button("Predict", type="primary"):
     try:
-        # Seedha 2D list pass karne se column name ka koi error nahi aayega
-        input_data = [[calories, protein]]
+        input_data = pd.DataFrame({
+            "Calories": [calories],
+            "Protein (g)": [protein],
+        })
         prediction = model.predict(input_data)
         st.success(f"Predicted Result: {prediction[0]}")
     except Exception as exc:
